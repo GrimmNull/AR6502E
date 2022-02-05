@@ -10,7 +10,7 @@ pub mod reducer_type {
             ActionTypes::ADC => {
                 // Parsing the operands
                 let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
-                let second_operand = action.action_arg2.parse::<u8>().unwrap();
+                let second_operand = if action.action_arg2.to_string() == "X" || action.action_arg2.to_string() == "Y" {if action.action_arg2.to_string() == "X" {state.x as u8} else {state.y as u8}} else { action.action_arg2.parse::<u8>().unwrap() };
 
                 // Checking if an overflow will occur and toggle the flag
                 if (state.memory[first_operand as usize] as u16 + second_operand as u16) > 256 {
@@ -19,6 +19,7 @@ pub mod reducer_type {
 
                 // Add the numbers and return the state
                 state.memory[first_operand as usize] = state.memory[first_operand as usize].wrapping_add(second_operand);
+                state.pc+= 1;
                 state
             },
             ActionTypes::AND => {
@@ -70,19 +71,23 @@ pub mod reducer_type {
                 state
             },
             ActionTypes::CLC => {
-                println!("This action wasn't implemented yet");
+                state.c = false;
+                state.pc+= 1;
                 state
             },
             ActionTypes::CLD => {
-                println!("This action wasn't implemented yet");
+                state.d= false;
+                state.pc+= 1;
                 state
             },
             ActionTypes::CLI => {
-                println!("This action wasn't implemented yet");
+                state.i = false;
+                state.pc+= 1;
                 state
             },
             ActionTypes::CLV => {
-                println!("This action wasn't implemented yet");
+                state.v = false;
+                state.pc+= 1;
                 state
             },
             ActionTypes::CMP => {
@@ -98,15 +103,19 @@ pub mod reducer_type {
                 state
             },
             ActionTypes::DEC => {
-                println!("This action wasn't implemented yet");
+                let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
+                state.memory[first_operand as usize]-=1;
+                state.pc+= 1;
                 state
             },
             ActionTypes::DEX => {
-                println!("This action wasn't implemented yet");
+                state.x-=1;
+                state.pc+= 1;
                 state
             },
             ActionTypes::DEY => {
-                println!("This action wasn't implemented yet");
+                state.y-=1;
+                state.pc+= 1;
                 state
             },
             ActionTypes::EOR => {
@@ -114,15 +123,17 @@ pub mod reducer_type {
                 state
             },
             ActionTypes::INC => {
-                println!("This action wasn't implemented yet");
+                let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
+                state.memory[first_operand as usize]+=1;
+                state.pc+= 1;
                 state
             },
             ActionTypes::INX => {
-                println!("This action wasn't implemented yet");
+                state.x+=1;
                 state
             },
             ActionTypes::INY => {
-                println!("This action wasn't implemented yet");
+                state.y+=1;
                 state
             },
             ActionTypes::JMP => {
@@ -134,15 +145,29 @@ pub mod reducer_type {
                 state
             },
             ActionTypes::LDA => {
-                println!("This action wasn't implemented yet");
+                let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
+                state.memory[first_operand as usize]= if action.action_arg1.to_string() == "X" {state.x as u8} else {state.y as u8};
+                state.pc+= 1;
                 state
             },
             ActionTypes::LDX => {
-                println!("This action wasn't implemented yet");
+                if action.action_arg1.to_string() == "Y" {
+                    state.x = state.y;
+                } else {
+                    let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
+                    state.x = state.memory[first_operand as usize] as i8;
+                }
+                state.pc+= 1;
                 state
             },
             ActionTypes::LDY => {
-                println!("This action wasn't implemented yet");
+                if action.action_arg1.to_string() == "X" {
+                    state.y = state.x;
+                } else {
+                    let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
+                    state.y = state.memory[first_operand as usize] as i8;
+                }
+                state.pc+= 1;
                 state
             },
             ActionTypes::LSR => {
@@ -150,7 +175,7 @@ pub mod reducer_type {
                 state
             },
             ActionTypes::NOP => {
-                println!("This action wasn't implemented yet");
+                state.pc+= 1;
                 state
             },
             ActionTypes::ORA => {
