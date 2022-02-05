@@ -8,12 +8,17 @@ pub mod reducer_type {
     pub fn reducer(mut state: State, action: Action) -> State {
         return match action.action_type {
             ActionTypes::ADC => {
+                // Parsing the operands
                 let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
-                let second_operand = action.action_arg2.parse::<u16>().unwrap();
-                if (state.memory[first_operand as usize] as u16 + second_operand) > 256 {
+                let second_operand = action.action_arg2.parse::<u8>().unwrap();
+
+                // Checking if an overflow will occur and toggle the flag
+                if (state.memory[first_operand as usize] as u16 + second_operand as u16) > 256 {
                     state.c = true;
                 }
-                state.memory[first_operand as usize] = ((state.memory[first_operand as usize] as u16 + second_operand) % 256) as u8;
+
+                // Add the numbers and return the state
+                state.memory[first_operand as usize] = state.memory[first_operand as usize].wrapping_add(second_operand);
                 state
             },
             ActionTypes::AND => {
