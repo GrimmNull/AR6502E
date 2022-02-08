@@ -2,9 +2,6 @@
 
 pub mod state_type {
     use console::Term;
-    use console::style;
-    use console::pad_str;
-    use console::Alignment;
 
     #[derive(Clone)]
     pub struct State {

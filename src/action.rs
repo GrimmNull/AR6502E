@@ -7,6 +7,7 @@ pub mod action_type {
         pub action_type: ActionTypes,
         pub action_arg1: String,
         pub action_arg2: String,
-        pub action_arg3: String
+        pub action_arg3: String,
+        pub dispatcher: String
     }
 }

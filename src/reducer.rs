@@ -5,7 +5,7 @@ pub mod reducer_type {
     use crate::state::state_type::State;
     use std::i64;
 
-    pub fn reducer(mut state: State, action: Action) -> State {
+    pub fn reducer(mut state: State, action: &Action) -> State {
         return match action.action_type {
             ActionTypes::ADC => {
                 // Parsing the operands
