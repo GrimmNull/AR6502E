@@ -30,7 +30,7 @@ pub mod state_type {
     impl State {
         pub fn print_memory(&self, page: u8) {
 
-            let memory_page = if page == 0 {(0..self.memory.len() as u8 -1)} else {((page-1)*64..page*64-1)};
+            let memory_page = if page == 0 {0..self.memory.len() as u8 -1} else {(page-1)*64..page*64-1};
             for line_index in memory_page.step_by(8) {
                 for column_index in line_index..line_index+8 {
                     print!("{memory_cell} ", memory_cell = self.memory[column_index as usize].clone());

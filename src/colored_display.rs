@@ -1,38 +1,46 @@
 
 pub mod colored_display {
     use console::Style;
-    use std::borrow::{Borrow, BorrowMut};
     use crate::bus::bus::Bus;
     use crate::device_interface::device_interface::Device;
-    use crate::state::state_type::State;
+    use crate::event_listener::event_listener::{EventListener, EventType};
 
+    #[derive(Clone)]
     pub struct ColoredDisplay {
-        r: u8,
-        g: u8,
-        b: u8,
-        bus: Bus,
-        id: String,
-        addresses: Vec<String>
+        pub r: u8,
+        pub g: u8,
+        pub b: u8,
+        pub bus: u8,
+        pub id: String,
+        pub addresses: Vec<String>
     }
 
     impl Device for ColoredDisplay {
 
-        fn wake(&mut self, state: State) {
-            self.r = self.bus.content[0].clone();
-            self.g = self.bus.content[1].clone();
-            self.b = self.bus.content[2].clone();
+        fn wake(&mut self, bus: Bus) {
+            self.r = bus.content[0].clone();
+            self.g = bus.content[1].clone();
+            self.b = bus.content[2].clone();
         }
 
         fn get_id(&self) -> String {
             self.id.to_string()
         }
 
-        fn get_event_listeners(&self) {
-            todo!()
+        fn get_event_listeners(&mut self) -> EventListener {
+            return EventListener {
+                id: 1,
+                device_id: self.id.to_string(),
+                device_bus: self.bus.clone(),
+                event_type: EventType::Addresses,
+                page: 0,
+                address: "".to_string(),
+                addresses: vec!["$1B".to_string(), "$1C".to_string(), "$1D".to_string()]
+            }
         }
 
-        fn get_bus(&mut self) -> &mut Bus {
-            self.bus.borrow_mut()
+        fn get_bus(&mut self) -> u8 {
+            self.bus.clone()
         }
 
         fn set_memory_space(&mut self, addresses: Vec<String>) {
