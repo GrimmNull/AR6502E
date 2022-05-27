@@ -37,10 +37,14 @@ pub mod memory_manager {
             self.event_listener_manager.run(self.state.clone(), action.borrow(), self.busses.borrow_mut(), self.devices.borrow_mut());
         }
 
+        fn mount_device<T: 'static + Device>(&mut self, device: Box<T>) {
+            self.devices.push(device);
+        }
+
         fn mount_devices(&mut self, devices: Vec<Box<dyn Device>>) {
             for mut device in devices.iter() {
                 self.busses.push(Bus{ content: vec![] });
-                self.devices.push(**device.borrow_mut());
+                self.mount_device(Box::new(device));
                 self.event_listener_manager.add_event_listener(device.get_event_listeners());
             }
         }

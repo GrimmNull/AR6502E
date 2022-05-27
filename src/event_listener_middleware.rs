@@ -31,8 +31,7 @@ pub mod event_listener_middleware {
                                 }
                                 index+=1;
                             }
-                            let mut device : &dyn Borrow<dyn Device> = devices[index as usize].borrow_mut();
-                            device.wake(&device, busses[event.device_bus as usize].clone());
+                            devices[index as usize].wake(busses[event.device_bus as usize].clone());
                         }
                         break;
                     }
@@ -48,9 +47,8 @@ pub mod event_listener_middleware {
                                 }
                                 index+=1;
                             }
-                            let mut device = devices[index as usize].borrow_mut();
 
-                            device.wake(busses[event.device_bus as usize].clone());
+                            devices[index as usize].wake(busses[event.device_bus as usize].clone());
                         }
                         break;
                     }
@@ -68,9 +66,8 @@ pub mod event_listener_middleware {
                                 }
                                 index+=1;
                             }
-                            let mut device = devices[index as usize].borrow_mut();
 
-                            device.wake(busses[event.device_bus as usize].clone());
+                            devices[index as usize].wake(busses[event.device_bus as usize].clone());
                         }
                         break;
                     }
