@@ -15,6 +15,8 @@ use std::borrow::Borrow;
 use state::state_type::get_initial_state;
 use memory_manager::memory_manager::get_processor;
 use reducer::reducer_type::reducer;
+use crate::bus::bus::Bus;
+use crate::colored_display::colored_display::ColoredDisplay;
 
 
 fn main() {
@@ -24,7 +26,15 @@ fn main() {
         reducer,
         1000,
          vec![],
-        vec![]
+        vec![],
+        vec![Box::new(ColoredDisplay{
+            r: 0,
+            g: 0,
+            b: 0,
+            bus: 0,
+            id: "coloredLed".to_string(),
+            addresses: vec![]
+        })]
     );
     m6502.run();
 }

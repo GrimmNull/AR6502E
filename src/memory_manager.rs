@@ -1,18 +1,19 @@
 
 pub mod memory_manager {
     use rand::Rng;
-    use std::borrow::Borrow;
+    use std::borrow::{Borrow, BorrowMut};
     use std::str::FromStr;
     use text_io::read;
     use crate::state::state_type::State;
     use crate::action::action_type::Action;
     use crate::action_types::action_types::ActionTypes;
+    use crate::bus::bus::Bus;
     use crate::device_interface::device_interface::Device;
     use crate::event_listener_middleware::event_listener_middleware::EventListenerMiddleware;
     use crate::middleware_interface::middleware_interface::Middleware;
 
 
-    #[derive(Clone)]
+
     pub struct Processor {
         user_tag: String,
         running: bool,
@@ -22,6 +23,8 @@ pub mod memory_manager {
         pub frequency: i32,
         pub pre_dispatch: Vec<fn (state: State, action: &Action) -> State>,
         pub post_dispatch: Vec<fn (state: State, action: &Action) -> State>,
+        pub busses: Vec<Bus>,
+        pub devices: Vec<Box<dyn Device>>
     }
 
     impl Processor {
@@ -31,7 +34,20 @@ pub mod memory_manager {
             self.state = (self.reducer)(self.state.clone(), action.borrow());
 
             dispatch_middleware(self.state.clone(), action.borrow(), self.post_dispatch.clone());
-            self.event_listener_manager.run(self.state.clone(), action.borrow());
+            self.event_listener_manager.run(self.state.clone(), action.borrow(), self.busses.borrow_mut(), self.devices.borrow_mut());
+        }
+
+        fn mount_device(&mut self, device: Box<dyn Device>) {
+            self.devices.push(device);
+        }
+
+        fn mount_devices(&mut self, devices: Vec<Box<dyn Device>>) {
+            for deviceClone in devices.iter() {
+                let mut device = deviceClone.get_clone();
+                self.busses.push(Bus{ content: vec![0; device.get_memory_width() as usize] });
+                self.mount_device(device.get_clone());
+                self.event_listener_manager.add_event_listener(device.get_event_listeners());
+            }
         }
 
 
@@ -89,11 +105,11 @@ pub mod memory_manager {
         return user_tag;
     }
 
-    pub fn get_processor(initial_state: State, reducer: fn (state: State, action: &Action) -> State, frequency: i32, pre_dispatch: Vec<fn (state: State, action: &Action) -> State>, post_dispatch: Vec<fn (state: State, action: &Action) -> State>) -> Processor {
+    pub fn get_processor(initial_state: State, reducer: fn (state: State, action: &Action) -> State, frequency: i32, pre_dispatch: Vec<fn (state: State, action: &Action) -> State>, post_dispatch: Vec<fn (state: State, action: &Action) -> State>, devices: Vec<Box<dyn Device>>) -> Processor {
         let event_manager = EventListenerMiddleware{
             events: vec![]
         };
-        return Processor {
+        let mut proc = Processor {
             user_tag: generate_random_user_tag(),
             running: false,
             state: initial_state,
@@ -101,7 +117,11 @@ pub mod memory_manager {
             reducer,
             frequency,
             pre_dispatch,
-            post_dispatch: vec![]
-        }
+            post_dispatch: vec![],
+            busses: vec![],
+            devices: vec![]
+        };
+        proc.mount_devices(devices);
+        return proc;
     }
 }

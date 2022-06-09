@@ -1,8 +1,10 @@
 
 pub mod event_listener_middleware {
+    use std::borrow::{Borrow, BorrowMut};
     use crate::action::action_type::Action;
+    use crate::bus::bus::Bus;
+    use crate::device_interface::device_interface::Device;
     use crate::event_listener::event_listener::{EventListener, EventType};
-    use crate::middleware_interface::middleware_interface::Middleware;
     use crate::state::state_type::State;
 
     #[derive(Clone)]
@@ -10,8 +12,8 @@ pub mod event_listener_middleware {
         pub events: Vec<EventListener>
     }
 
-    impl Middleware for EventListenerMiddleware {
-        fn run(&self, state: State, action: &Action) -> State {
+    impl EventListenerMiddleware {
+        pub(crate) fn run(&self, state: State, action: &Action, busses: &mut [Bus], devices: &mut [Box<dyn Device>]) -> State {
             for mut event in self.events.clone() {
                 match event.event_type {
                     EventType::Page => {
@@ -20,29 +22,52 @@ pub mod event_listener_middleware {
                         }
                         let first_operand = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
                         if first_operand > (64 * (event.page - 1)) as i64 && first_operand < (64 * event.page - 1) as i64 {
-                            event.device_bus.clear_bus();
-                            event.device_bus.write_to_buss(state.memory[64 * (event.page - 1) as usize..(64 * event.page - 1) as usize].to_vec());
-                            (event.device_call)();
+                            busses[event.device_bus as usize].clear_bus();
+                            busses[event.device_bus as usize].write_to_buss(state.memory[64 * (event.page - 1) as usize..(64 * event.page - 1) as usize].to_vec());
+                            let mut index: u8 = 0;
+                            for device in devices.iter() {
+                                if device.get_id() == event.device_id.to_string() {
+                                    break;
+                                }
+                                index+=1;
+                            }
+                            devices[index as usize].wake(busses[event.device_bus as usize].clone());
                         }
                         break;
                     }
                     EventType::Address => {
                         if action.action_arg1 == event.address {
-                            event.device_bus.clear_bus();
+                            busses[event.device_bus as usize].clear_bus();
                             let index = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
-                            event.device_bus.write_to_buss(vec![state.memory[index as usize]]);
-                            (event.device_call)();
+                            busses[event.device_bus as usize].write_to_buss(vec![state.memory[index as usize]]);
+                            let mut index: u8 = 0;
+                            for device in devices.iter() {
+                                if device.get_id() == event.device_id.to_string() {
+                                    break;
+                                }
+                                index+=1;
+                            }
+
+                            devices[index as usize].wake(busses[event.device_bus as usize].clone());
                         }
                         break;
                     }
                     EventType::Addresses => {
                         if event.addresses.contains(&action.action_arg1) {
-                            let mut bus = event.device_bus.content.clone();
+                            let mut bus = busses[event.device_bus as usize].content.clone();
                             let index = event.addresses.binary_search(&action.action_arg1).unwrap();
                             let memory_index = i64::from_str_radix(&action.action_arg1.to_string()[1..action.action_arg1.len()], 16).unwrap();
                             bus[index] = state.memory[memory_index as usize].clone();
-                            event.device_bus.write_to_buss(bus);
-                            (event.device_call)();
+                            busses[event.device_bus as usize].write_to_buss(bus);
+                            let mut index: u8 = 0;
+                            for device in devices.iter() {
+                                if device.get_id() == event.device_id.to_string() {
+                                    break;
+                                }
+                                index+=1;
+                            }
+
+                            devices[index as usize].wake(busses[event.device_bus as usize].clone());
                         }
                         break;
                     }

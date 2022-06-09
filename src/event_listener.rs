@@ -1,7 +1,6 @@
 
 
 pub mod event_listener {
-    use crate::bus::bus::Bus;
 
     #[derive(Clone)]
     pub enum EventType {
@@ -13,8 +12,8 @@ pub mod event_listener {
     #[derive(Clone)]
     pub struct EventListener {
         pub id: i32,
-        pub device_call: fn(),
-        pub device_bus: Bus,
+        pub device_id: String,
+        pub device_bus: u8,
         pub event_type: EventType,
         pub page: u8,
         pub address: String,
@@ -22,10 +21,10 @@ pub mod event_listener {
     }
 
     impl EventListener {
-        pub fn get_page_event_listener(id: i32, device_call: fn(), device_bus: Bus, event_type: EventType, page: u8) -> EventListener {
+        pub fn get_page_event_listener(id: i32, device_id: String, device_bus: u8, event_type: EventType, page: u8) -> EventListener {
             return EventListener {
                 id,
-                device_call,
+                device_id,
                 device_bus,
                 event_type,
                 page,
@@ -34,10 +33,10 @@ pub mod event_listener {
             }
         }
 
-        pub fn get_address_event_listener(id: i32, device_call: fn(), device_bus: Bus, event_type: EventType, address: String) -> EventListener {
+        pub fn get_address_event_listener(id: i32, device_id: String, device_bus: u8, event_type: EventType, address: String) -> EventListener {
             return EventListener {
                 id,
-                device_call,
+                device_id,
                 device_bus,
                 event_type,
                 page: 0,
@@ -46,10 +45,10 @@ pub mod event_listener {
             }
         }
 
-        pub fn get_addresses_event_listener(id: i32, device_call: fn(), device_bus: Bus, event_type: EventType, addresses: Vec<String>) -> EventListener {
+        pub fn get_addresses_event_listener(id: i32, device_id: String, device_bus: u8, event_type: EventType, addresses: Vec<String>) -> EventListener {
             return EventListener {
                 id,
-                device_call,
+                device_id,
                 device_bus,
                 event_type,
                 page: 0,

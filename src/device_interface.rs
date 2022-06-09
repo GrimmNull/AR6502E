@@ -1,21 +1,23 @@
 
 pub mod device_interface {
     use crate::bus::bus::Bus;
-    use crate::state::state_type::State;
+    use crate::event_listener::event_listener::EventListener;
 
     pub trait Device {
-        fn wake(&mut self, state: State);
+        fn wake(self: &mut Self, bus: Bus);
 
-        fn get_id(&self) -> String;
+        fn get_id(self: &Self) -> String;
 
-        fn get_event_listeners(&self);
+        fn get_event_listeners(self: &mut Self) -> EventListener;
 
-        fn get_bus(&mut self) -> &mut Bus;
+        fn get_bus(self: &mut Self) -> u8;
 
-        fn set_memory_space(&mut self, addresses: Vec<String>);
+        fn set_memory_space(self: &mut Self, addresses: Vec<String>);
 
-        fn get_memory_width(&self) -> u8;
+        fn get_memory_width(self: &Self) -> u8;
 
-        fn get_window(&self);
+        fn get_window(self: &Self);
+
+        fn get_clone(self: &Self) -> Box<dyn Device>;
     }
 }
