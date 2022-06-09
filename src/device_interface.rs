@@ -17,5 +17,7 @@ pub mod device_interface {
         fn get_memory_width(self: &Self) -> u8;
 
         fn get_window(self: &Self);
+
+        fn get_clone(self: &Self) -> Box<dyn Device>;
     }
 }

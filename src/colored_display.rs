@@ -1,9 +1,11 @@
 
 pub mod colored_display {
+    use colorful::Colorful;
     use console::Style;
     use crate::bus::bus::Bus;
     use crate::device_interface::device_interface::Device;
     use crate::event_listener::event_listener::{EventListener, EventType};
+    extern crate colorful;
 
     #[derive(Clone)]
     pub struct ColoredDisplay {
@@ -21,6 +23,8 @@ pub mod colored_display {
             self.r = bus.content[0].clone();
             self.g = bus.content[1].clone();
             self.b = bus.content[2].clone();
+
+            self.get_window();
         }
 
         fn get_id(&self) -> String {
@@ -48,16 +52,19 @@ pub mod colored_display {
         }
 
         fn get_memory_width(&self) -> u8 {
-            return 3;
+            return 4;
         }
 
         fn get_window(&self) {
-            let rgb_color = Style::new().color256((self.r+self.b+self.g)/3);
             println!("-----");
             println!("|    |");
-            println!("| {} |", rgb_color.apply_to("O"));
+            println!("| {} |", "0".rgb(self.r, self.g, self.b));
             println!("|    |");
             println!("-----");
+        }
+
+        fn get_clone(self: &Self) -> Box<dyn Device> {
+            return Box::new(self.clone()) as Box<dyn Device>;
         }
     }
 }
